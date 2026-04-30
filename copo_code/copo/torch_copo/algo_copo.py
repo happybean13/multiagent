@@ -121,7 +121,10 @@ class CoPOModel(CCModel):
             lcf_parameters = [0.0, np.log(self.model_config["custom_model_config"]["initial_lcf_std"])]
         else:
             lcf_parameters = [0.0]
-        self.lcf_parameters = torch.nn.Parameter(torch.as_tensor(lcf_parameters), requires_grad=True)
+        # Keep LCF params in fp32 so PPO optimizer state/grad dtypes stay consistent.
+        self.lcf_parameters = torch.nn.Parameter(
+            torch.as_tensor(lcf_parameters, dtype=torch.float32), requires_grad=True
+        )
 
         self.view_requirements[NEI_REWARDS] = ViewRequirement()
         self.view_requirements[NEI_VALUES] = ViewRequirement()
@@ -145,6 +148,10 @@ class CoPOModel(CCModel):
             in_size = size
         vf_layers.append(SlimFC(in_size=in_size, out_size=1, initializer=normc_initializer(0.01), activation_fn=None))
         return nn.Sequential(*vf_layers)
+
+    def get_centralized_critic_obs_dim(self):
+        # Critic consumes [obs, leader_action] where leader_action has dim=2.
+        return super(CoPOModel, self).get_centralized_critic_obs_dim() + 2
 
     def get_nei_value(self, centralized_critic_obs):
         return self._post(self.nei_value_network(centralized_critic_obs))
@@ -450,7 +457,7 @@ class CoPOPolicy(CCPPOPolicy):
         should be updated for all policies (including remote policies) since
         the postprocessing of trajectory is conducted in each policy separately.
         """
-        lcf_parameters = lcf_parameters.to(self.device)
+        lcf_parameters = lcf_parameters.to(device=self.device, dtype=self.model.lcf_parameters.dtype)
         old_mean = self.model.lcf_mean.item()
         assert self.model.lcf_parameters.size() == lcf_parameters.size()
         with torch.no_grad():
@@ -473,19 +480,39 @@ class CoPOPolicy(CCPPOPolicy):
     def postprocess_trajectory(self, sample_batch, other_agent_batches=None, episode=None):
         sample_batch = super(CoPOPolicy, self).postprocess_trajectory(sample_batch, other_agent_batches, episode)
         with torch.no_grad():
-            cobs = convert_to_torch_tensor(sample_batch[CENTRALIZED_CRITIC_OBS], self.device)
-            sample_batch[NEI_VALUES] = self.model.get_nei_value(cobs).cpu().detach().numpy().astype(np.float32)
-            sample_batch[GLOBAL_VALUES] = self.model.get_global_value(cobs).cpu().detach().numpy().astype(np.float32)
-
             infos = sample_batch.get(SampleBatch.INFOS)
             if episode is not None:  # After initialization
                 assert isinstance(infos[0], dict)
+                leader_actions = []
+                for index, info in enumerate(infos):
+                    leader_id = info.get("leader_id", None)
+                    t = sample_batch["t"][index]
+                    leader_action = np.zeros(2, dtype=np.float32)
+
+                    if leader_id is not None and other_agent_batches is not None and leader_id in other_agent_batches:
+                        _, leader_batch = other_agent_batches[leader_id]
+                        same_t_indices = np.where(leader_batch["t"] == t)[0]
+                        if len(same_t_indices) > 0:
+                            leader_index = same_t_indices[0]
+                            leader_action = leader_batch[SampleBatch.ACTIONS][leader_index]
+                    leader_actions.append(leader_action)
+                sample_batch["leader_action"] = np.asarray(leader_actions, dtype=np.float32)
+                assert sample_batch["leader_action"].shape[-1] == 2
+
                 # Modified: when initialized, add neighborhood/global reward/value
                 sample_batch[NEI_REWARDS] = np.array([info[NEI_REWARDS] for info in infos]).astype(np.float32)
                 sample_batch[GLOBAL_REWARDS] = np.array([info[GLOBAL_REWARDS] for info in infos]).astype(np.float32)
                 if self.config[USE_DISTRIBUTIONAL_LCF]:
                     # Note: step_lcf is in [-1, 1]
                     sample_batch["step_lcf"] = np.array([info["lcf"] for info in infos]).astype(np.float32)
+
+            if "leader_action" not in sample_batch:
+                sample_batch["leader_action"] = np.zeros((sample_batch.count, 2), dtype=np.float32)
+
+            sample_batch[CENTRALIZED_CRITIC_OBS][:, -2:] = sample_batch["leader_action"].astype(np.float32)
+            cobs = convert_to_torch_tensor(sample_batch[CENTRALIZED_CRITIC_OBS].astype(np.float32), self.device)
+            sample_batch[NEI_VALUES] = self.model.get_nei_value(cobs).cpu().detach().numpy().astype(np.float32)
+            sample_batch[GLOBAL_VALUES] = self.model.get_global_value(cobs).cpu().detach().numpy().astype(np.float32)
 
             # ===== Compute native, neighbour and global advantage =====
             # Note: native advantage is computed in super()

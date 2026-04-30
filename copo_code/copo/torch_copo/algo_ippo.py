@@ -59,6 +59,12 @@ class IPPOConfig(PPOConfig):
             obs_space = single_env.observation_space[DEFAULT_AGENT]
             act_space = single_env.action_space[DEFAULT_AGENT]
 
+        # Ray 2.2 checkpoint serialization expects Box._shape on spaces.
+        if isinstance(obs_space, gym.spaces.Box) and not hasattr(obs_space, "_shape"):
+            obs_space._shape = obs_space.shape
+        if isinstance(act_space, gym.spaces.Box) and not hasattr(act_space, "_shape"):
+            act_space._shape = act_space.shape
+
         assert isinstance(obs_space, gym.spaces.Box)
         # assert isinstance(act_space, gym.spaces.Box)
         # Note that we can't set policy name to "default_policy" since by doing so

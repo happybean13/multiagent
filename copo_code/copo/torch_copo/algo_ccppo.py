@@ -350,7 +350,7 @@ class CCPPOPolicy(PPOTorchPolicy):
                     )
                 elif self.config["fuse_mode"] == "none":
                     # Do nothing since OBS is already filled
-                    assert odim == sample_batch[CENTRALIZED_CRITIC_OBS].shape[1]
+                    assert sample_batch[CENTRALIZED_CRITIC_OBS].shape[1] >= odim
                 else:
                     raise ValueError("Unknown fuse mode: {}".format(self.config["fuse_mode"]))
 

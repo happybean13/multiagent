@@ -27,6 +27,73 @@ COMM_METHOD = "comm_method"
 NEI_OBS = "nei_obs"
 
 
+def compute_pairwise_ttc_leaders(agent_states, neighbor_radius=10.0):
+    """
+    agent_states:
+        {
+            agent_id: {
+                "position": np.array([x, y]),
+                "velocity": np.array([vx, vy])
+            }
+        }
+    returns:
+        {
+            agent_id: {
+                "leader_id": str or None,
+                "leader_ttc": float,
+                "ego_ttc_to_conflict": float
+            }
+        }
+    """
+    agent_ids = list(agent_states.keys())
+    min_ttc = {aid: np.inf for aid in agent_ids}
+    closest_conflict_agent = {aid: None for aid in agent_ids}
+
+    # 1) Compute each agent's closest conflict partner.
+    for i in agent_ids:
+        p_i = agent_states[i]["position"]
+        v_i = agent_states[i]["velocity"]
+        for j in agent_ids:
+            if i == j:
+                continue
+            p_j = agent_states[j]["position"]
+            v_j = agent_states[j]["velocity"]
+            rel_pos = p_j - p_i
+            dist = np.linalg.norm(rel_pos)
+            if dist > neighbor_radius or dist < 1e-6:
+                continue
+            unit_ij = rel_pos / dist
+            rel_vel = v_i - v_j
+            closing_speed = np.dot(rel_vel, unit_ij)
+            if closing_speed <= 0:
+                ttc = np.inf
+            else:
+                ttc = dist / closing_speed
+            if ttc < min_ttc[i]:
+                min_ttc[i] = ttc
+                closest_conflict_agent[i] = j
+
+    # 2) Decide leader/follower.
+    output = {}
+    for i in agent_ids:
+        j = closest_conflict_agent[i]
+        leader_id = None
+        leader_ttc = np.inf
+        if j is not None:
+            # If i has more time than j, i follows j.
+            # j is closer to conflict, so j becomes leader.
+            if min_ttc[i] > min_ttc[j]:
+                leader_id = j
+                leader_ttc = min_ttc[j]
+        output[i] = {
+            "leader_id": leader_id,
+            "leader_ttc": float(leader_ttc),
+            "ego_ttc_to_conflict": float(min_ttc[i]),
+        }
+
+    return output
+
+
 class CCEnv:
     """
     This class maintains a distance map of all agents and appends the
@@ -59,6 +126,13 @@ class CCEnv:
             self._comm_dim = self.config["communication"]["comm_size"] + 3
         else:
             self._comm_dim = self.config["communication"]["comm_size"]
+
+    def _safe_vehicles(self):
+        """Return vehicles map; tolerate transient MetaDrive agent-map errors."""
+        try:
+            return self.vehicles_including_just_terminated
+        except Exception:
+            return self.vehicles
 
     def _get_reset_return(self):
         if self.config["communication"][COMM_METHOD] != "none":
@@ -94,20 +168,23 @@ class CCEnv:
 
         o, r, d, i = super(CCEnv, self).step(actions)
         self._update_distance_map(dones=d)
+        vehicles = self._safe_vehicles()
         for kkk in i.keys():
             i[kkk]["all_agents"] = list(i.keys())
 
             neighbours, nei_distances = self._find_in_range(kkk, self.config["neighbours_distance"])
             i[kkk]["neighbours"] = neighbours
             i[kkk]["neighbours_distance"] = nei_distances
-
             if self.config["communication"][COMM_METHOD] != "none":
                 i[kkk][COMM_CURRENT_OBS] = []
                 for n in neighbours[:self.config["communication"]["comm_neighbours"]]:
                     if n in comm_actions:
                         if self.config["communication"]["add_pos_in_comm"]:
-                            ego_vehicle = self.vehicles_including_just_terminated[kkk]
-                            nei_vehicle = self.vehicles_including_just_terminated[n]
+                            ego_vehicle = vehicles.get(kkk, None)
+                            nei_vehicle = vehicles.get(n, None)
+                            if ego_vehicle is None or nei_vehicle is None:
+                                i[kkk][COMM_CURRENT_OBS].append(np.zeros((self._comm_dim, )))
+                                continue
                             relative_position = ego_vehicle.projection(nei_vehicle.position - ego_vehicle.position)
                             dis = np.linalg.norm(relative_position)
                             extra_comm_obs = [
@@ -119,6 +196,29 @@ class CCEnv:
                         i[kkk][COMM_CURRENT_OBS].append(tmp_comm_obs)
                     else:
                         i[kkk][COMM_CURRENT_OBS].append(np.zeros((self._comm_dim, )))
+
+        agent_states = {}
+        vehicles = self._safe_vehicles()
+        for agent_id in o.keys():
+            vehicle = vehicles.get(agent_id, None)
+            if vehicle is None:
+                continue
+            position = np.array(vehicle.position, dtype=np.float32)
+            if hasattr(vehicle, "velocity"):
+                velocity = np.array(vehicle.velocity, dtype=np.float32)
+            else:
+                heading = vehicle.heading_theta
+                speed = vehicle.speed
+                velocity = np.array([speed * np.cos(heading), speed * np.sin(heading)], dtype=np.float32)
+            agent_states[agent_id] = {"position": position, "velocity": velocity}
+
+        leader_infos = compute_pairwise_ttc_leaders(agent_states, neighbor_radius=10.0)
+        for agent_id, leader_info in leader_infos.items():
+            if agent_id not in i:
+                i[agent_id] = {}
+            i[agent_id]["leader_id"] = leader_info["leader_id"]
+            i[agent_id]["leader_ttc"] = leader_info["leader_ttc"]
+            i[agent_id]["ego_ttc_to_conflict"] = leader_info["ego_ttc_to_conflict"]
 
         return o, r, d, i
 
@@ -140,12 +240,9 @@ class CCEnv:
 
     def _update_distance_map(self, dones=None):
         self.distance_map.clear()
-        if hasattr(self, "vehicles_including_just_terminated"):
-            vehicles = self.vehicles_including_just_terminated
-            # if dones is not None:
-            #     assert (set(dones.keys()) - set(["__all__"])) == set(vehicles.keys()), (dones, vehicles)
-        else:
-            vehicles = self.vehicles  # Fallback to old version MetaDrive, but this is not accurate!
+        vehicles = self._safe_vehicles()
+        # if dones is not None:
+        #     assert (set(dones.keys()) - set(["__all__"])) == set(vehicles.keys()), (dones, vehicles)
         keys = [k for k, v in vehicles.items() if v is not None]
         for c1 in range(0, len(keys) - 1):
             for c2 in range(c1 + 1, len(keys)):
@@ -279,7 +376,7 @@ class LCFEnv(CCEnv):
         if self.config["add_traffic_light"]:
             self._traffic_light_counter = 0
             new_obses = {}
-            for agent_name, v in self.vehicles_including_just_terminated.items():
+            for agent_name, v in self._safe_vehicles().items():
                 if agent_name not in obses:
                     continue
                 new_obses[agent_name] = np.concatenate(
@@ -326,10 +423,16 @@ class LCFEnv(CCEnv):
             i[agent_name]["global_rewards"] = global_reward
 
             if self.config["add_traffic_light"]:
+                vehicles = self._safe_vehicles()
+                vehicle = vehicles.get(agent_name, None)
+                if vehicle is None:
+                    traffic_light_obs = np.zeros(3, dtype=np.float32)
+                else:
+                    traffic_light_obs = self.get_agent_traffic_light_msg(vehicle.position)
                 o[agent_name] = np.concatenate(
                     [
                         o[agent_name],
-                        self.get_agent_traffic_light_msg(self.vehicles_including_just_terminated[agent_name].position)
+                        traffic_light_obs
                     ]
                 )
 

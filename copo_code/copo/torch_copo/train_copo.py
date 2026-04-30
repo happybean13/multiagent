@@ -13,8 +13,8 @@ if __name__ == "__main__":
     exp_name = args.exp_name or "TEST"
 
     # Setup config
-    # We set the stop criterion to 2M environmental steps! Since PPO in single OurEnvironment converges at around 20k steps.
-    stop = int(100_0000)
+    # Run ~100 iterations (~100k env steps with default rollout settings).
+    stop = {"training_iteration": 100}
 
     config = dict(
         # ===== Environmental Setting =====
@@ -52,6 +52,7 @@ if __name__ == "__main__":
     train(
         CoPOTrainer,
         exp_name=exp_name,
+        checkpoint_freq=10,
         keep_checkpoints_num=5,
         stop=stop,
         config=config,  # Don't call get_ippo_config here!
