@@ -1,0 +1,89 @@
+Failure # 1 (occurred at 2026-04-30_05-20-49)
+[36mray::CoPOTrainer.train()[39m (pid=107347, ip=10.0.0.222, repr=CoPOTrainer)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 367, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 364, in train
+    result = self.step()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 749, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 2623, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_copo.py", line 547, in training_step
+    train_batch = synchronous_parallel_sample(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 85, in synchronous_parallel_sample
+    sample_batches = worker_set.foreach_worker(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 696, in foreach_worker
+    handle_remote_call_result_errors(remote_results, self._ignore_worker_failures)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 73, in handle_remote_call_result_errors
+    raise r.get()
+ray.exceptions.RayTaskError(KeyError): [36mray::RolloutWorker.apply()[39m (pid=107393, ip=10.0.0.222, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x71bf8bb82820>)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 183, in apply
+    raise e
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 174, in apply
+    return func(self, *args, **kwargs)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 86, in <lambda>
+    lambda w: w.sample(), local_worker=False, healthy_only=True
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 900, in sample
+    batches = [self.input_reader.next()]
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 92, in next
+    batches = [self.get_data()]
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 285, in get_data
+    item = next(self._env_runner)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 721, in _env_runner
+    base_env.send_actions(actions_to_send)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/env/multi_agent_env.py", line 615, in send_actions
+    raise e
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/env/multi_agent_env.py", line 608, in send_actions
+    obs, rewards, dones, infos = env.step(agent_dict)
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/utils/env_wrappers.py", line 400, in step
+    o, r, d, i = super(LCFEnv, self).step(actions)
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/utils/env_wrappers.py", line 163, in step
+    self._update_distance_map(dones=d)
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/utils/env_wrappers.py", line 234, in _update_distance_map
+    if hasattr(self, "vehicles_including_just_terminated"):
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/metadrive/envs/base_env.py", line 490, in vehicles_including_just_terminated
+    ret.update(self.agent_manager.just_terminated_agents)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/metadrive/manager/agent_manager.py", line 274, in just_terminated_agents
+    return {
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/metadrive/manager/agent_manager.py", line 275, in <dictcomp>
+    agent_name: self.get_agent(agent_name)[0]
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/metadrive/manager/agent_manager.py", line 289, in get_agent
+    object_name = self.agent_to_object(agent_name)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/metadrive/manager/agent_manager.py", line 316, in agent_to_object
+    return self._agent_to_object[agent_id]
+KeyError: 'agent40'
+Failure # 2 (occurred at 2026-04-30_05-21-20)
+[36mray::CoPOTrainer.train()[39m (pid=112523, ip=10.0.0.222, repr=CoPOTrainer)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 367, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 364, in train
+    result = self.step()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 749, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 2623, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_copo.py", line 582, in training_step
+    train_results = multi_gpu_train_one_step(self, train_batch)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/execution/train_ops.py", line 163, in multi_gpu_train_one_step
+    results = policy.learn_on_loaded_batch(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 728, in learn_on_loaded_batch
+    return self.learn_on_batch(batch)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 619, in learn_on_batch
+    self.apply_gradients(_directStepOptimizerSingleton)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 832, in apply_gradients
+    opt.step()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/torch/optim/optimizer.py", line 484, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/torch/optim/optimizer.py", line 89, in _use_grad
+    ret = func(self, *args, **kwargs)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/torch/optim/adam.py", line 226, in step
+    adam(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/torch/optim/optimizer.py", line 161, in maybe_fallback
+    return func(*args, **kwargs)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/torch/optim/adam.py", line 766, in adam
+    func(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/torch/optim/adam.py", line 379, in _single_tensor_adam
+    exp_avg.lerp_(grad, 1 - beta1)
+RuntimeError: expected dtype double for `weight` but got dtype float

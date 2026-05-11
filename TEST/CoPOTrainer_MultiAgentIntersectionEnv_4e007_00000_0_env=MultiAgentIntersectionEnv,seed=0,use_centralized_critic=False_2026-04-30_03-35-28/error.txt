@@ -1,0 +1,50 @@
+Failure # 1 (occurred at 2026-04-30_03-38-25)
+[36mray::CoPOTrainer.save()[39m (pid=24443, ip=10.0.0.222, repr=CoPOTrainer)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 473, in save
+    checkpoint_dict_or_path = self.save_checkpoint(checkpoint_dir)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 1959, in save_checkpoint
+    state = self.__getstate__()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 2382, in __getstate__
+    state["worker"] = self.workers.local_worker().get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 1602, in get_state
+    policy_states[pid] = self.policy_map[pid].get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/torch_mixins.py", line 98, in get_state
+    state = super().get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 907, in get_state
+    state = super().get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/policy.py", line 917, in get_state
+    state["policy_spec"] = policy_spec.serialize()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/policy.py", line 133, in serialize
+    "action_space": space_to_dict(self.action_space),
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/serialization.py", line 140, in space_to_dict
+    d = {"space": gym_space_to_dict(space)}
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/serialization.py", line 119, in gym_space_to_dict
+    return _box(space)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/serialization.py", line 62, in _box
+    "shape": sp._shape,  # shape is a tuple.
+AttributeError: 'Box' object has no attribute '_shape'
+Failure # 2 (occurred at 2026-04-30_03-41-21)
+[36mray::CoPOTrainer.save()[39m (pid=25992, ip=10.0.0.222, repr=CoPOTrainer)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 473, in save
+    checkpoint_dict_or_path = self.save_checkpoint(checkpoint_dir)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 1959, in save_checkpoint
+    state = self.__getstate__()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 2382, in __getstate__
+    state["worker"] = self.workers.local_worker().get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 1602, in get_state
+    policy_states[pid] = self.policy_map[pid].get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/torch_mixins.py", line 98, in get_state
+    state = super().get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 907, in get_state
+    state = super().get_state()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/policy.py", line 917, in get_state
+    state["policy_spec"] = policy_spec.serialize()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/policy/policy.py", line 133, in serialize
+    "action_space": space_to_dict(self.action_space),
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/serialization.py", line 140, in space_to_dict
+    d = {"space": gym_space_to_dict(space)}
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/serialization.py", line 119, in gym_space_to_dict
+    return _box(space)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/serialization.py", line 62, in _box
+    "shape": sp._shape,  # shape is a tuple.
+AttributeError: 'Box' object has no attribute '_shape'

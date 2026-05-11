@@ -1,0 +1,11 @@
+{
+  "callbacks": "<class 'copo.torch_copo.utils.callbacks.MultiAgentDrivingCallbacks'>",
+  "env": "MultiAgentIntersectionEnv",
+  "env_config": {},
+  "log_level": "DEBUG",
+  "num_workers": 0,
+  "rollout_fragment_length": 20,
+  "seed": 0,
+  "sgd_minibatch_size": 30,
+  "train_batch_size": 100
+}

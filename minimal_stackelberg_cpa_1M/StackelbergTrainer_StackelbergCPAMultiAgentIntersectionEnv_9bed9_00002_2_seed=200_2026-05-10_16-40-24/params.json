@@ -1,0 +1,13 @@
+{
+  "callbacks": "<class 'copo.torch_copo.utils.callbacks.MultiAgentDrivingCallbacks'>",
+  "env": "StackelbergCPAMultiAgentIntersectionEnv",
+  "env_config": {
+    "cpa_neighbor_radius": 10.0,
+    "cpa_r_safe": 3.0
+  },
+  "leader_action_source": "predicted_detached",
+  "log_level": "INFO",
+  "num_gpus": 0,
+  "seed": 200,
+  "vf_clip_param": 100
+}

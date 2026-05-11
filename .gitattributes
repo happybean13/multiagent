@@ -1,0 +1,16 @@
+# Track large training-run artifacts via Git LFS.
+# These files (especially per-iteration result.json) routinely exceed
+# GitHub's 100 MB hard limit, and binary pickles are not friendly to
+# git-diff anyway, so we move them all into LFS.
+
+# Per-iteration metrics dumps written by Ray Tune (often >100 MB).
+**/result.json filter=lfs diff=lfs merge=lfs -text
+
+# Policy / trainer checkpoint pickles.
+*.pkl filter=lfs diff=lfs merge=lfs -text
+
+# Saved Tune state files that occasionally grow large.
+**/experiment_state-*.json filter=lfs diff=lfs merge=lfs -text
+
+# TensorBoard event files (binary, often >10 MB).
+**/events.out.tfevents.* filter=lfs diff=lfs merge=lfs -text

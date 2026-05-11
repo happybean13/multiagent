@@ -1,0 +1,88 @@
+Failure # 1 (occurred at 2026-04-30_04-02-44)
+[36mray::CoPOTrainer.train()[39m (pid=52438, ip=10.0.0.222, repr=CoPOTrainer)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 367, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 364, in train
+    result = self.step()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 749, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 2623, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_copo.py", line 547, in training_step
+    train_batch = synchronous_parallel_sample(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 85, in synchronous_parallel_sample
+    sample_batches = worker_set.foreach_worker(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 696, in foreach_worker
+    handle_remote_call_result_errors(remote_results, self._ignore_worker_failures)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 73, in handle_remote_call_result_errors
+    raise r.get()
+ray.exceptions.RayTaskError(AssertionError): [36mray::RolloutWorker.apply()[39m (pid=52484, ip=10.0.0.222, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x71fbe9c06850>)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 183, in apply
+    raise e
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 174, in apply
+    return func(self, *args, **kwargs)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 86, in <lambda>
+    lambda w: w.sample(), local_worker=False, healthy_only=True
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 900, in sample
+    batches = [self.input_reader.next()]
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 92, in next
+    batches = [self.get_data()]
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 285, in get_data
+    item = next(self._env_runner)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 671, in _env_runner
+    active_envs, to_eval, outputs = _process_observations(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 1155, in _process_observations
+    sample_collector.try_build_truncated_episode_multi_agent_batch()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/collectors/simple_list_collector.py", line 644, in try_build_truncated_episode_multi_agent_batch
+    self.postprocess_episode(episode, is_done=False)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/collectors/simple_list_collector.py", line 512, in postprocess_episode
+    post_batches[agent_id] = policy.postprocess_trajectory(
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_copo.py", line 478, in postprocess_trajectory
+    sample_batch = super(CoPOPolicy, self).postprocess_trajectory(sample_batch, other_agent_batches, episode)
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_ccppo.py", line 353, in postprocess_trajectory
+    assert odim == sample_batch[CENTRALIZED_CRITIC_OBS].shape[1]
+AssertionError
+Failure # 2 (occurred at 2026-04-30_04-02-51)
+[36mray::CoPOTrainer.train()[39m (pid=52728, ip=10.0.0.222, repr=CoPOTrainer)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 367, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 364, in train
+    result = self.step()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 749, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 2623, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_copo.py", line 547, in training_step
+    train_batch = synchronous_parallel_sample(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 85, in synchronous_parallel_sample
+    sample_batches = worker_set.foreach_worker(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 696, in foreach_worker
+    handle_remote_call_result_errors(remote_results, self._ignore_worker_failures)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 73, in handle_remote_call_result_errors
+    raise r.get()
+ray.exceptions.RayTaskError(AssertionError): [36mray::RolloutWorker.apply()[39m (pid=52774, ip=10.0.0.222, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x7ec7ff0537f0>)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 183, in apply
+    raise e
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 174, in apply
+    return func(self, *args, **kwargs)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 86, in <lambda>
+    lambda w: w.sample(), local_worker=False, healthy_only=True
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 900, in sample
+    batches = [self.input_reader.next()]
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 92, in next
+    batches = [self.get_data()]
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 285, in get_data
+    item = next(self._env_runner)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 671, in _env_runner
+    active_envs, to_eval, outputs = _process_observations(
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 1155, in _process_observations
+    sample_collector.try_build_truncated_episode_multi_agent_batch()
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/collectors/simple_list_collector.py", line 644, in try_build_truncated_episode_multi_agent_batch
+    self.postprocess_episode(episode, is_done=False)
+  File "/home/guri/miniconda3/envs/stackelberg/lib/python3.8/site-packages/ray/rllib/evaluation/collectors/simple_list_collector.py", line 512, in postprocess_episode
+    post_batches[agent_id] = policy.postprocess_trajectory(
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_copo.py", line 478, in postprocess_trajectory
+    sample_batch = super(CoPOPolicy, self).postprocess_trajectory(sample_batch, other_agent_batches, episode)
+  File "/home/guri/workspace/multiagent/CoPO/copo_code/copo/torch_copo/algo_ccppo.py", line 353, in postprocess_trajectory
+    assert odim == sample_batch[CENTRALIZED_CRITIC_OBS].shape[1]
+AssertionError

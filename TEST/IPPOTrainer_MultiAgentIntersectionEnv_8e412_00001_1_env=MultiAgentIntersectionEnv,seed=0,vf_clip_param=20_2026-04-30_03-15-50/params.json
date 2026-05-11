@@ -1,0 +1,8 @@
+{
+  "callbacks": "<class 'copo.torch_copo.utils.callbacks.MultiAgentDrivingCallbacks'>",
+  "env": "MultiAgentIntersectionEnv",
+  "log_level": "DEBUG",
+  "num_gpus": 0,
+  "seed": 0,
+  "vf_clip_param": 20
+}

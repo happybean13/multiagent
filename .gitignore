@@ -127,3 +127,22 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Ray Tune driver / worker logs that aren't useful for sharing.
+# (We keep result.json, progress.csv, params.json, params.pkl, and
+# events.* for tensorboard so the runs remain inspectable.)
+**/worker-*.log
+**/worker-*.err
+**/worker-*.out
+**/runtime_env_setup-*.log
+**/dashboard_*.log
+**/raylet.*
+**/gcs_server.*
+**/log_monitor.*
+**/python-core-*.log
+
